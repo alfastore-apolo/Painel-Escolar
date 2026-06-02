@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#050508">
+<title>Painel Escolar</title>
+<style>
+/* ── VARIÁVEIS DARK ─────────────────────────────── */
+:root {
+  --bg:#050508; --surface:#0e0e18; --surface2:#16162a;
+  --border:rgba(255,255,255,0.08); --header-bg:rgba(5,5,8,0.9);
+  --accent:#4f8eff; --accent2:#00e5ff; --warn:#ffb020;
+  --danger:#ff4f6a; --success:#00e09e; --purple:#c084fc;
+  --text:#f0f4ff; --muted:#5a6480;
+  --card-radius:16px; --nav-bg:rgba(14,14,24,0.97);
+  --sheet-bg:#0e0e18; --input-bg:#16162a;
+  --glow1:rgba(79,142,255,0.13); --glow2:rgba(0,229,255,0.07);
+  --stat-hover:rgba(255,255,255,0.16); --card-hover:rgba(255,255,255,0.03);
+}
+/* ── VARIÁVEIS LIGHT ────────────────────────────── */
+[data-theme="light"] {
+  --bg:#f0f4ff; --surface:#ffffff; --surface2:#e8eef8;
+  --border:rgba(30,64,175,0.1); --header-bg:rgba(240,244,255,0.92);
+  --accent:#1e40af; --accent2:#1d4ed8; --warn:#d97706;
+  --danger:#dc2626; --success:#047857; --purple:#7c3aed;
+  --text:#0f172a; --muted:#64748b;
+  --nav-bg:rgba(255,255,255,0.97); --sheet-bg:#ffffff; --input-bg:#f1f5f9;
+  --glow1:rgba(30,64,175,0.06); --glow2:rgba(29,78,216,0.04);
+  --stat-hover:rgba(30,64,175,0.25); --card-hover:rgba(30,64,175,0.03);
+}
+
+/* ── RESET & BASE ───────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh; overflow-x:hidden;
+  transition:background .35s,color .35s;
+}
+body::before{
+  content:''; position:fixed; top:-200px; left:-200px;
+  width:600px; height:600px;
+  background:radial-gradient(circle,var(--glow1) 0%,transparent 70%);
+  pointer-events:none; z-index:0;
+}
+body::after{
+  content:''; position:fixed; bottom:-100px; right:-100px;
+  width:500px; height:500px;
+  background:radial-gradient(circle,var(--glow2) 0%,transparent 70%);
+  pointer-events:none; z-index:0;
+}
+
+/* ── HEADER ─────────────────────────────────────── */
+header{
+  position:sticky; top:0; z-index:50;
+  background:var(--header-bg); backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:10px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+  transition:background .35s,border-color .35s;
+}
+.logo{display:flex; align-items:center; gap:10px}
+
+/* Logo PE — bloco profissional */
+.logo-mark{
+  width:34px; height:34px; flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:900; color:#fff;
+  letter-spacing:-0.5px;
+  box-shadow:0 4px 14px rgba(79,142,255,0.35);
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+}
+[data-theme="light"] .logo-mark{box-shadow:0 4px 14px rgba(30,64,175,0.25)}
+
+.logo-text-block{display:flex; flex-direction:column; gap:1px}
+.logo-product{
+  font-size:13px; font-weight:800; line-height:1.15;
+  letter-spacing:0.02em; white-space:nowrap;
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+}
+.logo-school{
+  font-size:10px; font-weight:600; color:var(--accent2);
+  letter-spacing:0.01em; white-space:nowrap;
+}
+[data-theme="light"] .logo-school{color:var(--accent)}
+.logo-tagline{
+  font-size:8.5px; font-weight:400; color:var(--muted);
+  letter-spacing:0.03em; white-space:nowrap;
+}
+
+.header-right{display:flex; align-items:center; gap:7px}
+
+/* Tema toggle */
+.theme-toggle{
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:20px; display:flex; align-items:center; padding:2px; gap:1px;
+}
+.theme-opt{
+  border:none; background:transparent; border-radius:14px;
+  padding:3px 7px; font-size:12px; cursor:pointer;
+  transition:background .2s; color:var(--muted); line-height:1;
+}
+.theme-opt.active{background:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+
+/* Live badge */
+.live-badge{
+  display:flex; align-items:center; gap:4px;
+  font-size:8.5px; color:var(--success);
+  letter-spacing:0.06em; font-weight:600; white-space:nowrap;
+}
+.live-dot{
+  width:6px; height:6px; background:var(--success); border-radius:50%;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+
+/* Admin btn */
+.admin-btn{
+  background:transparent; border:1px solid var(--border);
+  color:var(--muted); padding:5px 9px; border-radius:8px;
+  cursor:pointer; font-size:11px;
+  font-family:-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif;
+  transition:all .2s; display:flex; align-items:center; gap:4px;
+}
+.admin-btn:hover{border-color:var(--accent);color:var(--accent)}
+.admin-btn.active{background:rgba(79,142,255,0.15);border-color:var(--accent);color:var(--accent)}
+
+/* ── MAIN ───────────────────────────────────────── */
+main{
+  position:relative; z-index:1;
+  padding:20px 16px 16px;
+  max-width:480px; margin:0 auto;
+}
+
+/* Date strip */
+.date-strip{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:18px; animation:fadeUp .4s ease both;
+}
+.date-main{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:700; font-size:21px;
+}
+.date-sub{font-size:11px; color:var(--muted); margin-top:2px}
+.time-clock{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:700; font-size:28px; color:var(--accent2); letter-spacing:.03em;
+}
+
+/* Stats */
+.stats-row{
+  display:grid; grid-template-columns:repeat(4,1fr);
+  gap:8px; margin-bottom:18px; animation:fadeUp .4s .08s ease both;
+}
+.stat-card{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--card-radius); padding:12px 8px; text-align:center;
+  transition:transform .2s,border-color .2s,background .35s;
+}
+.stat-card:hover{transform:translateY(-2px);border-color:var(--stat-hover)}
+.stat-icon{font-size:16px; margin-bottom:5px}
+.stat-value{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:800; font-size:19px;
+}
+.stat-label{font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.stat-card.danger .stat-value{color:var(--danger)}
+.stat-card.warn   .stat-value{color:var(--warn)}
+.stat-card.success .stat-value{color:var(--success)}
+.stat-card.info   .stat-value{color:var(--accent2)}
+
+/* Section */
+.section{margin-bottom:18px}
+.section-header{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px; animation:fadeUp .4s .12s ease both;
+}
+.section-title{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:700; font-size:11px;
+  text-transform:uppercase; letter-spacing:.09em; color:var(--muted);
+}
+.section-link{font-size:11px;color:var(--accent);text-decoration:none;transition:opacity .2s}
+.section-link:hover{opacity:.7}
+
+/* Card */
+.card{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--card-radius); overflow:hidden;
+  animation:fadeUp .4s .16s ease both;
+  transition:background .35s,border-color .35s;
+}
+.card-item{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 15px; border-bottom:1px solid var(--border);
+  transition:background .15s;
+}
+.card-item:last-child{border-bottom:none}
+.card-item:hover{background:var(--card-hover)}
+.item-icon{
+  width:36px; height:36px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; flex-shrink:0;
+}
+.item-icon.red{background:rgba(239,68,68,.1)}
+.item-icon.yellow{background:rgba(245,158,11,.1)}
+.item-icon.green{background:rgba(16,185,129,.1)}
+.item-icon.blue{background:rgba(79,142,255,.1)}
+[data-theme="light"] .item-icon.blue{background:rgba(30,64,175,.08)}
+.item-body{flex:1;min-width:0}
+.item-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.item-badge{font-size:9.5px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.badge-red{background:rgba(239,68,68,.1);color:var(--danger)}
+.badge-yellow{background:rgba(245,158,11,.1);color:var(--warn)}
+.badge-green{background:rgba(16,185,129,.1);color:var(--success)}
+.badge-blue{background:rgba(79,142,255,.1);color:var(--accent)}
+[data-theme="light"] .badge-blue{background:rgba(30,64,175,.08)}
+
+/* Espaços */
+.espaco-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px}
+.espaco-item{
+  border-radius:12px; padding:12px;
+  display:flex; flex-direction:column; gap:5px;
+  border:1px solid var(--border);
+  transition:background .35s,border-color .35s;
+}
+.espaco-item.livre{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.2)}
+.espaco-item.ocupado{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)}
+[data-theme="light"] .espaco-item.livre{background:rgba(4,120,87,.05);border-color:rgba(4,120,87,.18)}
+[data-theme="light"] .espaco-item.ocupado{background:rgba(220,38,38,.05);border-color:rgba(220,38,38,.18)}
+.espaco-nome{font-size:12px;font-weight:500}
+.espaco-status{font-size:10px}
+.espaco-item.livre .espaco-status{color:var(--success)}
+.espaco-item.ocupado .espaco-status{color:var(--danger)}
+
+/* Schedule */
+.schedule-row{
+  display:flex; align-items:stretch;
+  padding:0 15px; border-bottom:1px solid var(--border);
+}
+.schedule-row:last-child{border-bottom:none}
+.schedule-time{
+  width:50px; padding:12px 10px 12px 0;
+  font-size:10px; color:var(--muted); font-weight:500;
+  border-right:1px solid var(--border);
+  flex-shrink:0; display:flex; align-items:flex-start; padding-top:14px;
+}
+.schedule-content{flex:1;padding:10px 0 10px 12px}
+.schedule-slot{
+  background:rgba(79,142,255,.07);
+  border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;
+  padding:7px 10px; font-size:12px;
+}
+[data-theme="light"] .schedule-slot{background:rgba(30,64,175,.06)}
+.schedule-slot.free{background:transparent;border-left:3px solid var(--border);color:var(--muted)}
+.schedule-slot-title{font-weight:500}
+.schedule-slot-sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* Apps grid */
+.apps-grid{
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:10px; animation:fadeUp .4s .2s ease both;
+}
+.app-card{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--card-radius); padding:15px;
+  text-decoration:none; color:var(--text);
+  display:flex; flex-direction:column; gap:8px;
+  transition:all .2s; position:relative; overflow:hidden;
+}
+.app-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.app-card.oc::before{background:linear-gradient(90deg,var(--danger),transparent)}
+.app-card.tp::before{background:linear-gradient(90deg,var(--accent),transparent)}
+.app-card.ag::before{background:linear-gradient(90deg,var(--success),transparent)}
+.app-card.ca::before{background:linear-gradient(90deg,var(--warn),transparent)}
+.app-card.cm::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.app-card.ch::before{background:linear-gradient(90deg,#f97316,transparent)}
+.app-card.ba::before{background:linear-gradient(90deg,#14b8a6,transparent)}
+
+/* Cores de acento individuais por app */
+.app-card.oc{border-top:none}
+.app-card.ch .app-card-icon{filter:drop-shadow(0 0 6px rgba(249,115,22,0.5))}
+.app-card.ba .app-card-icon{filter:drop-shadow(0 0 6px rgba(20,184,166,0.5))}
+.app-card:hover{transform:translateY(-3px);border-color:var(--stat-hover)}
+/* Tint de fundo por app — bordas coloridas visíveis */
+.app-card.oc{background:linear-gradient(145deg,rgba(255,79,106,0.13),rgba(255,79,106,0.05));border:2px solid rgba(255,79,106,0.55)}
+.app-card.tp{background:linear-gradient(145deg,rgba(79,142,255,0.13),rgba(79,142,255,0.05));border:2px solid rgba(79,142,255,0.55)}
+.app-card.ag{background:linear-gradient(145deg,rgba(0,224,158,0.13),rgba(0,224,158,0.05));border:2px solid rgba(0,224,158,0.55)}
+.app-card.ca{background:linear-gradient(145deg,rgba(255,176,32,0.13),rgba(255,176,32,0.05));border:2px solid rgba(255,176,32,0.55)}
+.app-card.cm{background:linear-gradient(145deg,rgba(192,132,252,0.13),rgba(192,132,252,0.05));border:2px solid rgba(192,132,252,0.55)}
+.app-card.ch{background:linear-gradient(145deg,rgba(249,115,22,0.13),rgba(249,115,22,0.05));border:2px solid rgba(249,115,22,0.55)}
+.app-card.ba{background:linear-gradient(145deg,rgba(20,184,166,0.13),rgba(20,184,166,0.05));border:2px solid rgba(20,184,166,0.55)}
+/* Versão light — bordas coloridas bem visíveis */
+[data-theme="light"] .app-card.oc{background:linear-gradient(145deg,rgba(255,79,106,0.18),rgba(255,79,106,0.07));border:2px solid rgba(255,79,106,0.7)}
+[data-theme="light"] .app-card.tp{background:linear-gradient(145deg,rgba(30,64,175,0.15),rgba(30,64,175,0.06));border:2px solid rgba(30,64,175,0.6)}
+[data-theme="light"] .app-card.ag{background:linear-gradient(145deg,rgba(4,120,87,0.15),rgba(4,120,87,0.06));border:2px solid rgba(4,120,87,0.6)}
+[data-theme="light"] .app-card.ca{background:linear-gradient(145deg,rgba(217,119,6,0.18),rgba(217,119,6,0.07));border:2px solid rgba(217,119,6,0.7)}
+[data-theme="light"] .app-card.cm{background:linear-gradient(145deg,rgba(124,58,237,0.15),rgba(124,58,237,0.06));border:2px solid rgba(124,58,237,0.6)}
+[data-theme="light"] .app-card.ch{background:linear-gradient(145deg,rgba(234,88,12,0.18),rgba(234,88,12,0.07));border:2px solid rgba(234,88,12,0.7)}
+[data-theme="light"] .app-card.ba{background:linear-gradient(145deg,rgba(13,148,136,0.15),rgba(13,148,136,0.06));border:2px solid rgba(13,148,136,0.6)}
+/* Hover com borda colorida por app */
+.app-card.oc:hover{border-color:rgba(255,79,106,0.4)}
+.app-card.tp:hover{border-color:rgba(79,142,255,0.4)}
+.app-card.ag:hover{border-color:rgba(0,224,158,0.4)}
+.app-card.ca:hover{border-color:rgba(255,176,32,0.4)}
+.app-card.cm:hover{border-color:rgba(192,132,252,0.4)}
+.app-card.ch:hover{border-color:rgba(249,115,22,0.4)}
+.app-card.ba:hover{border-color:rgba(20,184,166,0.4)}
+/* Seta colorida por app no hover */
+.app-card.oc:hover .app-card-arrow{color:var(--danger)}
+.app-card.tp:hover .app-card-arrow{color:var(--accent)}
+.app-card.ag:hover .app-card-arrow{color:var(--success)}
+.app-card.ca:hover .app-card-arrow{color:var(--warn)}
+.app-card.cm:hover .app-card-arrow{color:var(--purple)}
+.app-card.ch:hover .app-card-arrow{color:#f97316}
+.app-card.ba:hover .app-card-arrow{color:#14b8a6}
+.app-card-icon{font-size:24px}
+.app-card-name{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:700; font-size:13px;
+}
+.app-card-desc{font-size:10.5px;color:var(--muted);line-height:1.4}
+.app-card-arrow{position:absolute;bottom:13px;right:13px;font-size:15px;color:var(--muted);transition:transform .2s,color .2s}
+.app-card:hover .app-card-arrow{transform:translate(2px,-2px);color:var(--accent)}
+.app-card.em-breve{opacity:.5;cursor:default;pointer-events:none}
+.app-card.em-breve.ativo{opacity:1;cursor:pointer;pointer-events:all}
+.em-breve-badge{
+  position:absolute;bottom:11px;right:11px;
+  font-size:8.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  background:rgba(192,132,252,.12);color:var(--purple);
+  border:1px solid rgba(192,132,252,.25);
+  padding:2px 7px;border-radius:20px;
+}
+.app-card.em-breve.ativo .em-breve-badge{display:none}
+
+/* Rodapé marca d'água */
+.watermark-footer{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding:16px 16px 108px; text-align:center;
+}
+.watermark-brand{font-size:11.5px;font-weight:400;color:var(--muted);letter-spacing:.01em}
+[data-theme="light"] .watermark-brand{color:#94a3b8}
+.watermark-support{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;color:#25d366;
+  text-decoration:none;transition:opacity .2s;
+}
+.watermark-support:hover{opacity:.8}
+.watermark-support strong{color:#25d366;font-weight:700;font-size:11px}
+
+/* Bottom nav */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  background:var(--nav-bg);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;
+  padding:10px 0 20px;
+  transition:background .35s,border-color .35s;
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;font-size:9.5px;color:var(--muted);
+  transition:color .2s;padding:4px 14px;border-radius:10px;
+  border:none;background:transparent;
+  font-family:-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif;
+}
+.nav-item.active{color:var(--accent)}
+.nav-item:hover{color:var(--text)}
+.nav-icon{font-size:20px}
+
+/* ── ADMIN OVERLAY ──────────────────────────────── */
+.admin-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(10px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.admin-overlay.open{opacity:1;pointer-events:all}
+.admin-sheet{
+  background:var(--sheet-bg);
+  border-radius:24px 24px 0 0;border:1px solid var(--border);
+  width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
+  transform:translateY(100%);
+  transition:transform .4s cubic-bezier(.34,1.2,.64,1),background .35s;
+  padding-bottom:40px;
+}
+.admin-overlay.open .admin-sheet{transform:translateY(0)}
+.admin-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:13px auto 0}
+.admin-header{padding:18px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.admin-title{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:800;font-size:19px;
+}
+.admin-title span{color:var(--accent)}
+.close-btn{
+  background:var(--surface2);border:none;color:var(--muted);
+  width:30px;height:30px;border-radius:8px;cursor:pointer;
+  font-size:15px;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.close-btn:hover{color:var(--text);background:var(--border)}
+
+/* Lock */
+.lock-screen{
+  padding:28px 24px;
+  display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;
+}
+.lock-mark{
+  width:68px;height:68px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:18px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;color:#fff;
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  box-shadow:0 8px 24px rgba(79,142,255,0.35);
+}
+.lock-title{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:700;font-size:17px;
+}
+.lock-sub{font-size:13px;color:var(--muted)}
+.pin-input-wrap{position:relative;width:100%}
+.pin-input{
+  width:100%;background:var(--input-bg);border:1px solid var(--border);
+  border-radius:12px;color:var(--text);font-size:16px;
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  padding:13px 44px 13px 16px;outline:none;
+  transition:border-color .2s,background .35s;letter-spacing:.1em;
+}
+.pin-input:focus{border-color:var(--accent)}
+.pin-input.error{border-color:var(--danger);animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pin-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:17px;color:var(--muted)}
+.btn-primary{
+  width:100%;padding:13px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;border-radius:12px;color:#fff;
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:700;font-size:15px;cursor:pointer;transition:opacity .2s,transform .1s;
+}
+.btn-primary:hover{opacity:.9}
+.btn-primary:active{transform:scale(.98)}
+.error-msg{font-size:12px;color:var(--danger)}
+
+/* Admin content */
+.admin-content{padding:18px;display:flex;flex-direction:column;gap:18px}
+.admin-section-title{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;
+}
+.field-group{display:flex;flex-direction:column;gap:8px}
+.field-label{font-size:12px;color:var(--muted)}
+.field-input{
+  background:var(--input-bg);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:14px;
+  font-family:-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif;
+  padding:11px 14px;outline:none;
+  transition:border-color .2s,background .35s;width:100%;
+}
+.field-input:focus{border-color:var(--accent)}
+.btn-save{
+  background:rgba(79,142,255,.1);border:1px solid rgba(79,142,255,.22);
+  border-radius:10px;color:var(--accent);
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:700;font-size:13px;padding:10px 16px;
+  cursor:pointer;transition:all .2s;width:100%;margin-top:4px;
+}
+[data-theme="light"] .btn-save{background:rgba(30,64,175,.07);border-color:rgba(30,64,175,.18)}
+.btn-save:hover{background:rgba(79,142,255,.2)}
+[data-theme="light"] .btn-save:hover{background:rgba(30,64,175,.13)}
+.save-toast{font-size:12px;color:var(--success);display:flex;align-items:center;gap:5px;opacity:0;transition:opacity .3s;height:0;overflow:hidden}
+.save-toast.show{opacity:1;height:auto}
+.divider{height:1px;background:var(--border)}
+.btn-logout{
+  background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);
+  border-radius:10px;color:var(--danger);
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:700;font-size:13px;padding:12px 16px;cursor:pointer;
+  transition:all .2s;width:100%;
+}
+.btn-logout:hover{background:rgba(239,68,68,.15)}
+
+/* Theme selector */
+.theme-selector{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.theme-card{
+  border-radius:12px;padding:13px 12px;border:2px solid var(--border);
+  cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:7px;
+}
+.theme-card.selected{border-color:var(--accent)}
+.theme-card-preview{height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:15px}
+.preview-dark{background:#050508}
+.preview-light{background:#f0f4ff;border:1px solid rgba(30,64,175,.1)}
+.theme-card-name{
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  font-weight:700;font-size:12px;
+}
+.theme-card-desc{font-size:10px;color:var(--muted)}
+.theme-check{
+  width:16px;height:16px;border-radius:50%;border:2px solid var(--border);
+  margin-left:auto;display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#fff;transition:all .2s;
+}
+.theme-card.selected .theme-check{background:var(--accent);border-color:var(--accent)}
+
+/* Links manager */
+.link-item-admin{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:11px 13px;margin-bottom:7px;
+}
+.link-item-admin-icon{font-size:20px;flex-shrink:0}
+.link-item-admin-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.link-item-admin-name{font-size:13px;font-weight:600}
+.link-url-input{background:transparent;border:none;outline:none;color:var(--muted);font-size:11px;width:100%;font-family:inherit;padding:0}
+.link-url-input:focus{color:var(--text)}
+.btn-delete{
+  background:rgba(239,68,68,.09);border:1px solid rgba(239,68,68,.2);
+  border-radius:8px;color:var(--danger);width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;flex-shrink:0;transition:background .2s;
+}
+.btn-delete:hover{background:rgba(239,68,68,.2)}
+.add-link-box{
+  background:var(--surface2);border:1px dashed rgba(79,142,255,.3);
+  border-radius:12px;padding:13px;margin-top:4px;
+}
+.add-link-title{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:10px}
+
+/* Animações live */
+.stat-value.updating{animation:blink .35s ease}
+@keyframes blink{0%{opacity:1}50%{opacity:.3}100%{opacity:1}}
+.live-tag{display:inline-flex;align-items:center;gap:3px;font-size:8px;color:var(--success);font-weight:700;letter-spacing:.05em;vertical-align:middle;margin-left:4px}
+.live-tag::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+.countdown-badge{font-variant-numeric:tabular-nums}
+.rt-updated{font-size:8px;color:var(--muted);text-align:right;padding:6px 14px 4px;font-style:italic}
+
+.view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body data-theme="dark">
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">PE</div>
+    <div class="logo-text-block">
+      <div class="logo-product">PAINEL ESCOLAR</div>
+      <div class="logo-school" id="headerSchoolName">CETI Dariana</div>
+      <div class="logo-tagline">O ecossistema digital da sua escola</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div>⚡ Tempo Real</div>
+    <div class="theme-toggle">
+      <button class="theme-opt active" id="btnDark" onclick="setTheme('dark')">🌑</button>
+      <button class="theme-opt" id="btnLight" onclick="setTheme('light')">☀️</button>
+    </div>
+    <button class="admin-btn" id="adminBtn" onclick="openAdmin()">⚙️ Admin</button>
+  </div>
+</header>
+
+<main>
+  <div class="view active" id="view-home">
+
+    <div class="date-strip">
+      <div>
+        <div class="date-main" id="dateMain">—</div>
+        <div class="date-sub" id="dateSub">Carregando...</div>
+      </div>
+      <div class="time-clock" id="clockEl">--:--</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card danger"><div class="stat-icon">⚠️</div><div class="stat-value">3</div><div class="stat-label">Ocorrências</div></div>
+      <div class="stat-card warn"><div class="stat-icon">🏫</div><div class="stat-value">2</div><div class="stat-label">Espaços</div></div>
+      <div class="stat-card info"><div class="stat-icon">⏱️</div><div class="stat-value">8</div><div class="stat-label">Tempos</div></div>
+      <div class="stat-card success"><div class="stat-icon">📅</div><div class="stat-value">2°</div><div class="stat-label">Bimestre</div></div>
+    </div>
+
+    <!-- Ocorrências -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">⚠️ Ocorrências do dia <span class="live-tag">AO VIVO</span></span>
+        <a class="section-link" id="sectionLink_ocorrencias" href="https://cetidariana.web.app" target="_blank">Ver app →</a>
+      </div>
+      <div class="card">
+        <div class="card-item">
+          <div class="item-icon red">😤</div>
+          <div class="item-body"><div class="item-title">Agressão verbal — João P.</div><div class="item-sub">Turma 3A · Prof. Marcos · 08:20</div></div>
+          <span class="item-badge badge-red">Pendente</span>
+        </div>
+        <div class="card-item">
+          <div class="item-icon yellow">📱</div>
+          <div class="item-body"><div class="item-title">Uso de celular — Ana S.</div><div class="item-sub">Turma 2B · Prof. Carla · 09:45</div></div>
+          <span class="item-badge badge-yellow">Acomp.</span>
+        </div>
+        <div class="card-item">
+          <div class="item-icon green">✅</div>
+          <div class="item-body"><div class="item-title">Bagunça em sala — Lucas M.</div><div class="item-sub">Turma 1C · Prof. Fernanda · 07:10</div></div>
+          <span class="item-badge badge-green">Resolvido</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Espaços -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">🏫 Espaços agora <span class="live-tag">AO VIVO</span></span>
+        <a class="section-link" id="sectionLink_agendamentos" href="https://agendamento-4c83a.web.app" target="_blank">Ver app →</a>
+      </div>
+      <div class="card">
+        <div class="espaco-grid">
+          <div class="espaco-item ocupado"><div>💻</div><div class="espaco-nome">Lab. Informática</div><div class="espaco-status">● Ocupado · Prof. Rui</div></div>
+          <div class="espaco-item livre"><div>🔬</div><div class="espaco-nome">Lab. Ciências</div><div class="espaco-status">● Disponível</div></div>
+          <div class="espaco-item ocupado"><div>📚</div><div class="espaco-nome">Biblioteca</div><div class="espaco-status">● Ocupado · Turma 2A</div></div>
+          <div class="espaco-item livre"><div>🎭</div><div class="espaco-nome">Auditório</div><div class="espaco-status">● Disponível</div></div>
+          <div class="espaco-item livre"><div>🏊</div><div class="espaco-nome">Piscina</div><div class="espaco-status">● Disponível</div></div>
+          <div class="espaco-item ocupado"><div>🛠️</div><div class="espaco-nome">Sala Maker</div><div class="espaco-status">● Ocupado · Prof. Ana</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tempos -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">⏱️ Horário de hoje</span>
+        <a class="section-link" id="sectionLink_tempos" href="https://horarios-tempos.web.app" target="_blank">Ver app →</a>
+      </div>
+      <div class="card">
+        <div class="schedule-row"><div class="schedule-time">07:00</div><div class="schedule-content"><div class="schedule-slot"><div class="schedule-slot-title">1° e 2° Tempo — Matemática</div><div class="schedule-slot-sub">Turma 3A · Prof. Marcos</div></div></div></div>
+        <div class="schedule-row"><div class="schedule-time">08:40</div><div class="schedule-content"><div class="schedule-slot"><div class="schedule-slot-title">3° Tempo — Português</div><div class="schedule-slot-sub">Turma 2B · Prof. Carla</div></div></div></div>
+        <div class="schedule-row"><div class="schedule-time">09:30</div><div class="schedule-content"><div class="schedule-slot free"><div class="schedule-slot-title">Intervalo</div></div></div></div>
+        <div class="schedule-row"><div class="schedule-time">10:00</div><div class="schedule-content"><div class="schedule-slot"><div class="schedule-slot-title">4° e 5° Tempo — Ciências</div><div class="schedule-slot-sub">Turma 1C · Prof. Fernanda</div></div></div></div>
+      </div>
+    </div>
+
+    <!-- Calendário -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">📅 Próximos eventos <span class="live-tag">AO VIVO</span></span>
+        <a class="section-link" id="sectionLink_calendario" href="https://calendario-seduc.web.app" target="_blank">Ver app →</a>
+      </div>
+      <div class="card">
+        <div class="card-item">
+          <div class="item-icon yellow">📝</div>
+          <div class="item-body"><div class="item-title">AV2 — 2° Bimestre</div><div class="item-sub">09 de junho de 2026</div></div>
+          <span class="item-badge badge-yellow">15 dias</span>
+        </div>
+        <div class="card-item">
+          <div class="item-icon blue">🎯</div>
+          <div class="item-body"><div class="item-title">AV3 — 2° Bimestre</div><div class="item-sub">30 de junho de 2026</div></div>
+          <span class="item-badge badge-blue">36 dias</span>
+        </div>
+        <div class="card-item">
+          <div class="item-icon green">🏖️</div>
+          <div class="item-body"><div class="item-title">Início das Férias</div><div class="item-sub">08 de julho de 2026</div></div>
+          <span class="item-badge badge-green">44 dias</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comunicação -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">💬 Comunicação Escola–Família</span>
+        <span id="linkComunicacaoWrap" style="display:none">
+          <a class="section-link" id="linkComunicacao" href="#" target="_blank">Ver app →</a>
+        </span>
+      </div>
+      <div class="card">
+        <div class="card-item" id="comunicacaoPlaceholder">
+          <div class="item-icon" style="background:rgba(192,132,252,.1)">💬</div>
+          <div class="item-body">
+            <div class="item-title" style="color:var(--purple)">App em desenvolvimento</div>
+            <div class="item-sub">Cole o link no Admin para ativar quando estiver pronto</div>
+          </div>
+          <span class="item-badge" style="background:rgba(192,132,252,.1);color:var(--purple)">Em breve</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acesso rápido -->
+    <div class="section">
+      <div class="section-header"><span class="section-title">🔗 Acesso rápido</span></div>
+      <div class="apps-grid" id="appsGrid"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Rodapé -->
+<div class="watermark-footer">
+  <div class="watermark-brand">Desenvolvido por <span id="footerBrand">Alfa Store — Soluções e Tecnologia</span></div>
+  <a class="watermark-support" id="footerWhatsapp" href="https://wa.me/5592994810508" target="_blank">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    <strong>Suporte — (92) 99481-0508</strong>
+  </a>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="switchNav(this)"><span class="nav-icon">🏠</span>Início</button>
+  <button class="nav-item" onclick="switchNav(this)"><span class="nav-icon">⚠️</span>Ocorrências</button>
+  <button class="nav-item" onclick="switchNav(this)"><span class="nav-icon">🏫</span>Espaços</button>
+  <button class="nav-item" onclick="switchNav(this)"><span class="nav-icon">📅</span>Calendário</button>
+</nav>
+
+<!-- Admin overlay -->
+<div class="admin-overlay" id="adminOverlay" onclick="handleOverlayClick(event)">
+  <div class="admin-sheet">
+    <div class="admin-handle"></div>
+
+    <div id="lockScreen">
+      <div class="lock-screen">
+        <div class="lock-mark">PE</div>
+        <div>
+          <div class="lock-title">Área Administrativa</div>
+          <div class="lock-sub">Digite a palavra-chave para continuar</div>
+        </div>
+        <div class="pin-input-wrap">
+          <input class="pin-input" id="pinInput" type="password" placeholder="Palavra-chave" onkeydown="if(event.key==='Enter')checkPin()">
+          <button class="pin-toggle" onclick="togglePin()">👁️</button>
+        </div>
+        <div class="error-msg" id="pinError" style="display:none">Palavra-chave incorreta. Tente novamente.</div>
+        <button class="btn-primary" onclick="checkPin()">Entrar →</button>
+      </div>
+    </div>
+
+    <div id="adminContent" style="display:none">
+      <div class="admin-header">
+        <div class="admin-title">⚙️ <span>Admin</span></div>
+        <button class="close-btn" onclick="closeAdmin()">✕</button>
+      </div>
+      <div class="admin-content">
+
+        <div>
+          <div class="admin-section-title">🎨 Tema de Cores</div>
+          <div class="theme-selector">
+            <div class="theme-card selected" id="cardDark" onclick="setTheme('dark')">
+              <div class="theme-card-preview preview-dark">🌑✨</div>
+              <div class="theme-card-name">Modo Escuro</div>
+              <div class="theme-card-desc">Fundo preto · Letras coloridas</div>
+              <div class="theme-check" id="checkDark">✓</div>
+            </div>
+            <div class="theme-card" id="cardLight" onclick="setTheme('light')">
+              <div class="theme-card-preview preview-light">☀️🔵</div>
+              <div class="theme-card-name">Modo Claro</div>
+              <div class="theme-card-desc">Fundo branco · Azul real</div>
+              <div class="theme-check" id="checkLight"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+          <div class="admin-section-title">🏫 Nome da Escola</div>
+          <div class="field-group">
+            <label class="field-label">Nome exibido no cabeçalho</label>
+            <input class="field-input" id="schoolNameInput" type="text" placeholder="Ex: CETI Dariana">
+            <button class="btn-save" onclick="saveSchoolName()">💾 Salvar Nome</button>
+            <div class="save-toast" id="toastName">✅ Nome atualizado!</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+          <div class="admin-section-title">🔗 Links dos Aplicativos</div>
+          <div id="linksManager"></div>
+          <div class="add-link-box">
+            <div class="add-link-title">➕ Adicionar novo app</div>
+            <div class="field-group">
+              <div style="display:flex;gap:8px">
+                <input class="field-input" id="newAppEmoji" type="text" placeholder="🔗" maxlength="4" style="width:60px;text-align:center;font-size:18px;flex-shrink:0">
+                <input class="field-input" id="newAppName" type="text" placeholder="Nome do app" style="flex:1">
+              </div>
+              <input class="field-input" id="newAppUrl" type="url" placeholder="https://...">
+              <button class="btn-save" onclick="addLink()">➕ Adicionar</button>
+              <div class="save-toast" id="toastAdd">✅ App adicionado!</div>
+            </div>
+          </div>
+          <div class="save-toast" id="toastLinks" style="margin-top:8px">✅ Links atualizados!</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+          <div class="admin-section-title">🏢 Rodapé — Marca d'água</div>
+          <div class="field-group">
+            <label class="field-label">Nome da empresa</label>
+            <input class="field-input" id="footerBrandInput" type="text" placeholder="Ex: Alfa Store — Soluções e Tecnologia">
+            <label class="field-label" style="margin-top:4px">WhatsApp (somente números)</label>
+            <input class="field-input" id="footerPhoneInput" type="tel" placeholder="Ex: 5592994810508">
+            <label class="field-label" style="margin-top:4px">Texto exibido do número</label>
+            <input class="field-input" id="footerPhoneLabelInput" type="text" placeholder="Ex: (92) 99481-0508">
+            <button class="btn-save" onclick="saveFooter()">💾 Salvar Rodapé</button>
+            <div class="save-toast" id="toastFooter">✅ Rodapé atualizado!</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+        <button class="btn-logout" onclick="logout()">🔴 Sair do modo Admin</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATE_KEY='painel_escolar_v2';
+let state={
+  theme:'dark', schoolName:'CETI Dariana',
+  footer:{brand:'Alfa Store — Soluções e Tecnologia',phone:'5592994810508',phoneLabel:'(92) 99481-0508'},
+  apps:[
+    {key:'ocorrencias',  emoji:'⚠️',  name:'Ocorrências',      url:'https://cetidariana.web.app',          emBreve:false},
+    {key:'tempos',       emoji:'⏱️',  name:'Tempos de Aula',   url:'https://horarios-tempos.web.app',      emBreve:false},
+    {key:'agendamentos', emoji:'🏫',  name:'Agendamentos',     url:'https://agendamento-4c83a.web.app',    emBreve:false},
+    {key:'calendario',   emoji:'📅',  name:'Calendário',       url:'https://calendario-seduc.web.app',     emBreve:false},
+    {key:'chamada',      emoji:'✅',  name:'Contagem Escolar', url:'https://chamada--escolar.web.app',     emBreve:false},
+    {key:'comunicacao',  emoji:'💬',  name:'Escola Conectada', url:'https://comunicacao--escolar.web.app', emBreve:false},
+    {key:'buscaativa',   emoji:'🔍',  name:'Busca Ativa',      url:'https://busca--ativa.web.app',         emBreve:false}
+  ]
+};
+
+function loadState(){
+  try{
+    const s=JSON.parse(sessionStorage.getItem(STATE_KEY)||'{}');
+    if(s.theme) state.theme=s.theme;
+    if(s.schoolName) state.schoolName=s.schoolName;
+    if(s.footer) state.footer={...state.footer,...s.footer};
+    if(s.apps&&s.apps.length) state.apps=s.apps;
+  }catch(e){}
+  applyState();
+}
+function saveState(){try{sessionStorage.setItem(STATE_KEY,JSON.stringify(state))}catch(e){}}
+
+function applyState(){
+  document.body.setAttribute('data-theme',state.theme);
+  document.getElementById('headerSchoolName').textContent=state.schoolName;
+
+  // Grid acesso rápido
+  const grid=document.getElementById('appsGrid');
+  if(grid){
+    grid.innerHTML='';
+    const colorMap={ocorrencias:'oc',tempos:'tp',agendamentos:'ag',calendario:'ca',comunicacao:'cm',chamada:'ch',buscaativa:'ba'};
+    state.apps.forEach(app=>{
+      const cls=colorMap[app.key]||'oc';
+      const hasUrl=!!app.url;
+      const isEmBreve=app.emBreve&&!hasUrl;
+      const el=document.createElement(hasUrl?'a':'div');
+      el.className=`app-card ${cls}${isEmBreve?' em-breve':''}`;
+      if(hasUrl){el.href=app.url;el.target='_blank';}
+      el.innerHTML=`
+        <div class="app-card-icon">${app.emoji}</div>
+        <div class="app-card-name">${app.name}</div>
+        <div class="app-card-desc">${hasUrl?app.url.replace('https://',''):'Link não configurado'}</div>
+        ${isEmBreve?'<span class="em-breve-badge">Em breve</span>':'<div class="app-card-arrow">↗</div>'}
+      `;
+      grid.appendChild(el);
+    });
+  }
+
+  // Links das seções
+  state.apps.forEach(app=>{
+    const el=document.getElementById('sectionLink_'+app.key);
+    if(el){el.href=app.url||'#';el.style.display=app.url?'':'none';}
+  });
+
+  // Comunicação / Escola Conectada
+  const comApp=state.apps.find(a=>a.key==='comunicacao');
+  const comUrl=comApp?comApp.url:'';
+  const ph=document.getElementById('comunicacaoPlaceholder');
+  const lw=document.getElementById('linkComunicacaoWrap');
+  const lc=document.getElementById('linkComunicacao');
+  if(ph){
+    if(comUrl){
+      ph.innerHTML=`<div class="item-icon" style="background:rgba(192,132,252,.1)">💬</div><div class="item-body"><div class="item-title">Escola Conectada — ativa</div><div class="item-sub">${comUrl}</div></div><span class="item-badge" style="background:rgba(192,132,252,.1);color:var(--purple)">Ativo ✓</span>`;
+      if(lw)lw.style.display='';if(lc)lc.href=comUrl;
+    }else{
+      ph.innerHTML=`<div class="item-icon" style="background:rgba(192,132,252,.1)">💬</div><div class="item-body"><div class="item-title" style="color:var(--purple)">App em desenvolvimento</div><div class="item-sub">Cole o link no Admin para ativar quando estiver pronto</div></div><span class="item-badge" style="background:rgba(192,132,252,.1);color:var(--purple)">Em breve</span>`;
+      if(lw)lw.style.display='none';
+    }
+  }
+
+  // Footer
+  const fb=document.getElementById('footerBrand');
+  const fw=document.getElementById('footerWhatsapp');
+  if(fb)fb.textContent=state.footer.brand;
+  if(fw){fw.href=`https://wa.me/${state.footer.phone}`;fw.querySelector('strong').textContent=`Suporte — ${state.footer.phoneLabel}`;}
+
+  updateThemeUI();
+}
+
+function renderLinksManager(){
+  const c=document.getElementById('linksManager');
+  if(!c)return;
+  c.innerHTML='';
+  state.apps.forEach((app,idx)=>{
+    const row=document.createElement('div');
+    row.className='link-item-admin';
+    row.innerHTML=`
+      <div class="link-item-admin-icon">${app.emoji}</div>
+      <div class="link-item-admin-body">
+        <div class="link-item-admin-name">${app.name}${app.emBreve&&!app.url?' <span style="font-size:10px;color:var(--purple);font-weight:400">(em breve)</span>':''}</div>
+        <input class="link-url-input" type="url"
+          placeholder="${app.emBreve&&!app.url?'Cole o link aqui para ativar...':'https://...'}"
+          value="${app.url}"
+          oninput="updateAppUrl(${idx},this.value)">
+      </div>
+      <button class="btn-delete" onclick="deleteApp(${idx})" title="Excluir">🗑️</button>
+    `;
+    c.appendChild(row);
+  });
+  const s=document.createElement('div');
+  s.style.marginTop='4px';
+  s.innerHTML=`<button class="btn-save" onclick="saveAllLinks()" style="width:100%">💾 Salvar todos os links</button>`;
+  c.appendChild(s);
+}
+
+function updateAppUrl(idx,val){
+  state.apps[idx].url=val.trim();
+  if(state.apps[idx].emBreve&&val.trim())state.apps[idx].emBreve=false;
+  if(!val.trim()&&state.apps[idx].key==='comunicacao')state.apps[idx].emBreve=true;
+}
+function saveAllLinks(){saveState();applyState();showToast('toastLinks')}
+function deleteApp(idx){
+  if(!confirm(`Excluir "${state.apps[idx].name}"?`))return;
+  state.apps.splice(idx,1);saveState();applyState();renderLinksManager();
+}
+function addLink(){
+  const emoji=document.getElementById('newAppEmoji').value.trim()||'🔗';
+  const name=document.getElementById('newAppName').value.trim();
+  const url=document.getElementById('newAppUrl').value.trim();
+  if(!name){alert('Digite o nome do app.');return;}
+  state.apps.push({key:'app_'+Date.now(),emoji,name,url,emBreve:!url});
+  saveState();applyState();renderLinksManager();
+  document.getElementById('newAppEmoji').value='';
+  document.getElementById('newAppName').value='';
+  document.getElementById('newAppUrl').value='';
+  showToast('toastAdd');
+}
+
+function setTheme(t){state.theme=t;saveState();applyState()}
+function updateThemeUI(){
+  const d=state.theme==='dark';
+  document.getElementById('btnDark').classList.toggle('active',d);
+  document.getElementById('btnLight').classList.toggle('active',!d);
+  document.getElementById('cardDark').classList.toggle('selected',d);
+  document.getElementById('cardLight').classList.toggle('selected',!d);
+  document.getElementById('checkDark').textContent=d?'✓':'';
+  document.getElementById('checkLight').textContent=!d?'✓':'';
+}
+
+const DAYS=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const MONTHS=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clockEl').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('dateMain').textContent=DAYS[n.getDay()];
+  document.getElementById('dateSub').textContent=`${n.getDate()} de ${MONTHS[n.getMonth()]} de ${n.getFullYear()}`;
+}
+updateClock();setInterval(updateClock,1000);
+
+function switchNav(btn){document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+
+const SENHA='Atlanta';
+let isLoggedIn=false;
+function openAdmin(){
+  document.getElementById('adminOverlay').classList.add('open');
+  if(!isLoggedIn){
+    document.getElementById('lockScreen').style.display='';
+    document.getElementById('adminContent').style.display='none';
+    document.getElementById('pinInput').value='';
+    document.getElementById('pinError').style.display='none';
+    setTimeout(()=>document.getElementById('pinInput').focus(),400);
+  }else{showAdminContent()}
+}
+function closeAdmin(){document.getElementById('adminOverlay').classList.remove('open')}
+function handleOverlayClick(e){if(e.target===document.getElementById('adminOverlay'))closeAdmin()}
+function togglePin(){const i=document.getElementById('pinInput');i.type=i.type==='password'?'text':'password'}
+function checkPin(){
+  if(document.getElementById('pinInput').value===SENHA){
+    isLoggedIn=true;
+    document.getElementById('pinError').style.display='none';
+    showAdminContent();
+    document.getElementById('adminBtn').classList.add('active');
+  }else{
+    const i=document.getElementById('pinInput');
+    i.classList.add('error');
+    document.getElementById('pinError').style.display='block';
+    setTimeout(()=>i.classList.remove('error'),400);
+  }
+}
+function showAdminContent(){
+  document.getElementById('lockScreen').style.display='none';
+  document.getElementById('adminContent').style.display='';
+  document.getElementById('schoolNameInput').value=state.schoolName;
+  document.getElementById('footerBrandInput').value=state.footer.brand;
+  document.getElementById('footerPhoneInput').value=state.footer.phone;
+  document.getElementById('footerPhoneLabelInput').value=state.footer.phoneLabel;
+  renderLinksManager();
+  updateThemeUI();
+}
+function logout(){isLoggedIn=false;document.getElementById('adminBtn').classList.remove('active');closeAdmin()}
+function saveSchoolName(){
+  const v=document.getElementById('schoolNameInput').value.trim();
+  if(!v)return;
+  state.schoolName=v;saveState();applyState();showToast('toastName');
+}
+function saveFooter(){
+  const brand=document.getElementById('footerBrandInput').value.trim();
+  const phone=document.getElementById('footerPhoneInput').value.trim();
+  const label=document.getElementById('footerPhoneLabelInput').value.trim();
+  if(brand)state.footer.brand=brand;
+  if(phone)state.footer.phone=phone;
+  if(label)state.footer.phoneLabel=label;
+  saveState();applyState();showToast('toastFooter');
+}
+function showToast(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+loadState();
+
+/* ── TEMPO REAL ──────────────────────────────────────────────── */
+
+// Espaços: alterna status aleatoriamente simulando dados ao vivo
+const espacosData = [
+  {emoji:'💻', nome:'Lab. Informática', turno: ['ocupado','ocupado','livre','ocupado']},
+  {emoji:'🔬', nome:'Lab. Ciências',    turno: ['livre','ocupado','livre','livre']},
+  {emoji:'📚', nome:'Biblioteca',       turno: ['ocupado','livre','ocupado','livre']},
+  {emoji:'🎭', nome:'Auditório',        turno: ['livre','livre','ocupado','livre']},
+  {emoji:'🏊', nome:'Piscina',          turno: ['livre','ocupado','livre','livre']},
+  {emoji:'🛠️', nome:'Sala Maker',      turno: ['ocupado','ocupado','livre','ocupado']},
+];
+const ocupadoPor = ['Prof. Rui','Turma 2A','Prof. Ana','Turma 3B','Prof. Marcos','Turma 1C'];
+
+function getEspacoSlot(){
+  const h = new Date().getHours();
+  if(h<9) return 0; if(h<11) return 1; if(h<14) return 2; return 3;
+}
+
+function renderEspacos(){
+  const grid = document.querySelector('.espaco-grid');
+  if(!grid) return;
+  const slot = getEspacoSlot();
+  grid.innerHTML = '';
+  espacosData.forEach((e,i)=>{
+    const ocupado = e.turno[slot]==='ocupado';
+    const div = document.createElement('div');
+    div.className = `espaco-item ${ocupado?'ocupado':'livre'}`;
+    div.innerHTML = `<div>${e.emoji}</div><div class="espaco-nome">${e.nome}</div><div class="espaco-status">${ocupado?`● Ocupado · ${ocupadoPor[i%ocupadoPor.length]}`:'● Disponível'}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+// Ocorrências: dados dinâmicos baseados no horário atual
+const ocorrenciasBase = [
+  {icon:'😤',cor:'red', titulo:'Agressão verbal — João P.',   sub:'Turma 3A · Prof. Marcos',    badge:'Pendente',   badgeCls:'badge-red',    hora:'08:20'},
+  {icon:'📱',cor:'yellow',titulo:'Uso de celular — Ana S.',   sub:'Turma 2B · Prof. Carla',     badge:'Acomp.',     badgeCls:'badge-yellow', hora:'09:45'},
+  {icon:'✅',cor:'green', titulo:'Bagunça em sala — Lucas M.',sub:'Turma 1C · Prof. Fernanda',  badge:'Resolvido',  badgeCls:'badge-green',  hora:'07:10'},
+  {icon:'🏃',cor:'yellow',titulo:'Saída sem permissão — Pedro L.',sub:'Turma 2C · Prof. Bruno',badge:'Pendente',   badgeCls:'badge-yellow', hora:'10:30'},
+  {icon:'🤜', cor:'red', titulo:'Briga no recreio — Carlos E.',sub:'Pátio · Supervisão',        badge:'Em análise', badgeCls:'badge-red',    hora:'10:55'},
+];
+
+function renderOcorrencias(){
+  const card = document.querySelector('#sectionLink_ocorrencias')?.closest('.section')?.querySelector('.card');
+  if(!card) return;
+  const n = new Date();
+  const minutos = n.getHours()*60+n.getMinutes();
+  // Mostra ocorrências "que já aconteceram" com base na hora simulada
+  const visiveis = ocorrenciasBase.filter(o=>{
+    const [h,m] = o.hora.split(':').map(Number);
+    return (h*60+m) <= (minutos % 720 + 420); // ciclo de 12h
+  });
+  const lista = visiveis.length ? visiveis : [ocorrenciasBase[0]];
+  // Atualiza contagem no stat card
+  const statOc = document.querySelector('.stat-card.danger .stat-value');
+  if(statOc){
+    const pendentes = lista.filter(o=>o.badge==='Pendente'||o.badge==='Em análise').length;
+    if(statOc.textContent != pendentes){
+      statOc.textContent = pendentes;
+      statOc.classList.add('updating');
+      setTimeout(()=>statOc.classList.remove('updating'),400);
+    }
+  }
+  card.innerHTML = lista.slice(-3).map(o=>`
+    <div class="card-item">
+      <div class="item-icon ${o.cor}">${o.icon}</div>
+      <div class="item-body"><div class="item-title">${o.titulo}</div><div class="item-sub">${o.sub} · ${o.hora}</div></div>
+      <span class="item-badge ${o.badgeCls}">${o.badge}</span>
+    </div>`).join('')+`<div class="rt-updated">⟳ atualizado agora</div>`;
+}
+
+// Calendário: contagem regressiva em tempo real
+const eventos = [
+  {icon:'📝',cor:'yellow',titulo:'AV2 — 2° Bimestre',   data:new Date('2026-06-09')},
+  {icon:'🎯',cor:'blue',  titulo:'AV3 — 2° Bimestre',   data:new Date('2026-06-30')},
+  {icon:'🏖️',cor:'green', titulo:'Início das Férias',   data:new Date('2026-07-08')},
+  {icon:'📚',cor:'yellow',titulo:'Volta às Aulas',       data:new Date('2026-07-28')},
+];
+const meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+function diasRestantes(data){
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const alvo = new Date(data); alvo.setHours(0,0,0,0);
+  return Math.ceil((alvo-hoje)/(1000*60*60*24));
+}
+function badgeCor(dias){
+  if(dias<=7) return 'badge-red';
+  if(dias<=20) return 'badge-yellow';
+  return 'badge-green';
+}
+
+function renderCalendario(){
+  const card = document.querySelector('#sectionLink_calendario')?.closest('.section')?.querySelector('.card');
+  if(!card) return;
+  const futuros = eventos.filter(e=>diasRestantes(e.data)>=0).slice(0,3);
+  card.innerHTML = futuros.map(e=>{
+    const dias = diasRestantes(e.data);
+    const d = e.data;
+    const badgeClass = badgeCor(dias);
+    const texto = dias===0?'Hoje':dias===1?'Amanhã':`${dias} dias`;
+    return `<div class="card-item">
+      <div class="item-icon ${e.cor}">${e.icon}</div>
+      <div class="item-body"><div class="item-title">${e.titulo}</div><div class="item-sub">${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}</div></div>
+      <span class="item-badge ${badgeClass} countdown-badge">${texto}</span>
+    </div>`;
+  }).join('')+`<div class="rt-updated">⟳ contagem em tempo real</div>`;
+}
+
+// Stat card de espaços livres
+function updateStatEspacos(){
+  const slot = getEspacoSlot();
+  const livres = espacosData.filter(e=>e.turno[slot]==='livre').length;
+  const statEs = document.querySelector('.stat-card.warn .stat-value');
+  if(statEs && statEs.textContent != livres){
+    statEs.textContent = livres;
+    statEs.classList.add('updating');
+    setTimeout(()=>statEs.classList.remove('updating'),400);
+  }
+}
+
+// Stat card de tempos — mostra tempo atual em curso
+function updateStatTempos(){
+  const n = new Date();
+  const h = n.getHours(), m = n.getMinutes();
+  const totalMin = h*60+m;
+  // Faixa 7h–17h = 8 tempos de ~60min
+  const inicio=7*60, fim=17*60;
+  let tempoAtual = 0;
+  if(totalMin>=inicio && totalMin<fim){
+    tempoAtual = Math.min(8, Math.ceil((totalMin-inicio)/60));
+  }
+  const statTp = document.querySelector('.stat-card.info .stat-value');
+  if(statTp) statTp.textContent = tempoAtual||'—';
+}
+
+// Inicializa e agenda atualizações
+function tickRealtime(){
+  renderEspacos();
+  renderOcorrencias();
+  renderCalendario();
+  updateStatEspacos();
+  updateStatTempos();
+}
+tickRealtime();
+setInterval(tickRealtime, 30000); // atualiza a cada 30s
+setInterval(renderCalendario, 60000); // contagem regressiva a cada 1min
+</script>
+</body>
+</html>
